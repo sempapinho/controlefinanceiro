@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão Financeira Pessoal</title>
     
+    <!-- Tailwind CSS para estilização rápida e responsiva -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para os ícones -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -15,7 +18,7 @@
             background-color: #f8fafc;
         }
         
-        /* Ocultar setas dos inputs de número */
+        /* Ocultar setas nativas dos inputs de número para um visual mais limpo */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -29,9 +32,10 @@
             background: rgba(255, 255, 255, 1);
             border-radius: 1rem;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
+        /* Estilização do seletor de cores */
         .color-picker-wrapper input[type="color"] {
             -webkit-appearance: none;
             border: none;
@@ -41,6 +45,7 @@
             cursor: pointer;
             padding: 0;
             overflow: hidden;
+            background: transparent;
         }
         .color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
             padding: 0;
@@ -51,35 +56,36 @@
             box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
         }
         
-        /* Custom Scrollbar for Lists */
+        /* Barra de rolagem customizada para as listas */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen pb-20">
 
-    <nav class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
-                <i class="fas fa-wallet"></i> Minhas Finanças
+                <i class="fas fa-chart-line"></i> <span class="hidden sm:inline">Gestão Financeira</span>
             </h1>
-            <button id="saveBtn" class="bg-white text-indigo-600 hover:bg-indigo-50 font-semibold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Salvar Dados</span>
+            <button id="saveBtn" class="bg-white text-indigo-600 hover:bg-indigo-50 active:scale-95 font-semibold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-save"></i> <span>Salvar Dados</span>
             </button>
         </div>
     </nav>
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 z-50 transform transition-all duration-300 translate-y-full opacity-0 pointer-events-none">
-        <div class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 border-l-4 border-emerald-500">
             <i id="toastIcon" class="fas fa-check-circle text-emerald-400"></i>
-            <span id="toastMessage">Sucesso!</span>
+            <span id="toastMessage">Dados salvos no seu dispositivo!</span>
         </div>
     </div>
 
     <main class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
+        <!-- COLUNA ESQUERDA: Entradas e Saídas -->
         <div class="lg:col-span-5 space-y-6">
             
             <div class="glass-card p-6">
@@ -91,13 +97,13 @@
                     <!-- Ganhos -->
                     <div>
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-bold text-slate-600 uppercase">Ganhos</h3>
-                            <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded" id="total-ganhos">R$ 0,00</span>
+                            <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Ganhos</h3>
+                            <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded shadow-sm border border-emerald-100" id="total-ganhos">R$ 0,00</span>
                         </div>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" id="desc-ganhos" placeholder="Descrição" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <input type="number" id="val-ganhos" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" step="0.01">
-                            <button id="add-ganhos" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>
+                            <input type="text" id="desc-ganhos" placeholder="Ex: Venda de caixas" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow">
+                            <input type="number" id="val-ganhos" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow" step="0.01" min="0">
+                            <button id="add-ganhos" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 rounded-lg transition-colors shadow-sm"><i class="fas fa-plus"></i></button>
                         </div>
                         <ul id="list-ganhos" class="space-y-2 max-h-40 overflow-y-auto pr-1 empty:hidden custom-scrollbar"></ul>
                     </div>
@@ -105,13 +111,13 @@
                     <!-- Gastos Fixos -->
                     <div class="pt-4 border-t border-slate-100">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-bold text-slate-600 uppercase">Gastos Fixos</h3>
-                            <span class="text-sm font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded" id="total-fixos">R$ 0,00</span>
+                            <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Gastos Fixos</h3>
+                            <span class="text-sm font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded shadow-sm border border-rose-100" id="total-fixos">R$ 0,00</span>
                         </div>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" id="desc-fixos" placeholder="Descrição" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <input type="number" id="val-fixos" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" step="0.01">
-                            <button id="add-fixos" class="bg-rose-500 hover:bg-rose-600 text-white px-3 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>
+                            <input type="text" id="desc-fixos" placeholder="Ex: Assinatura de Software" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none transition-shadow">
+                            <input type="number" id="val-fixos" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none transition-shadow" step="0.01" min="0">
+                            <button id="add-fixos" class="bg-rose-500 hover:bg-rose-600 text-white px-3 rounded-lg transition-colors shadow-sm"><i class="fas fa-plus"></i></button>
                         </div>
                         <ul id="list-fixos" class="space-y-2 max-h-40 overflow-y-auto pr-1 empty:hidden custom-scrollbar"></ul>
                     </div>
@@ -119,13 +125,13 @@
                     <!-- Gastos Variáveis -->
                     <div class="pt-4 border-t border-slate-100">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-bold text-slate-600 uppercase">Gastos Variáveis</h3>
-                            <span class="text-sm font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded" id="total-variaveis">R$ 0,00</span>
+                            <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Gastos Variáveis</h3>
+                            <span class="text-sm font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded shadow-sm border border-amber-100" id="total-variaveis">R$ 0,00</span>
                         </div>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" id="desc-variaveis" placeholder="Descrição" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <input type="number" id="val-variaveis" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" step="0.01">
-                            <button id="add-variaveis" class="bg-amber-500 hover:bg-amber-600 text-white px-3 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>
+                            <input type="text" id="desc-variaveis" placeholder="Ex: Papel lamicote" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition-shadow">
+                            <input type="number" id="val-variaveis" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition-shadow" step="0.01" min="0">
+                            <button id="add-variaveis" class="bg-amber-500 hover:bg-amber-600 text-white px-3 rounded-lg transition-colors shadow-sm"><i class="fas fa-plus"></i></button>
                         </div>
                         <ul id="list-variaveis" class="space-y-2 max-h-40 overflow-y-auto pr-1 empty:hidden custom-scrollbar"></ul>
                     </div>
@@ -133,51 +139,58 @@
             </div>
         </div>
 
+        <!-- COLUNA DIREITA: Análise e Alocação -->
         <div class="lg:col-span-7 space-y-6">
             
-            <!-- Valor Restante -->
-            <div class="glass-card p-6 bg-gradient-to-r from-slate-800 to-slate-900 text-white relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500 rounded-full opacity-20 blur-2xl"></div>
-                <h2 class="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Valor Restante</h2>
-                <div class="text-4xl sm:text-5xl font-bold tracking-tight" id="displayRestante">R$ 0,00</div>
-                <p class="text-sm text-slate-400 mt-2">Disponível para alocação nas categorias abaixo</p>
+            <!-- Valor Restante (Painel Principal) -->
+            <div class="glass-card p-6 bg-gradient-to-br from-slate-800 to-slate-900 text-white relative overflow-hidden shadow-lg">
+                <div class="absolute -right-10 -top-10 w-48 h-48 bg-indigo-500 rounded-full opacity-20 blur-3xl"></div>
+                <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-emerald-500 rounded-full opacity-20 blur-2xl"></div>
+                
+                <h2 class="text-sm font-medium text-slate-300 uppercase tracking-wider mb-1 relative z-10">Valor Restante</h2>
+                <div class="text-4xl sm:text-5xl font-bold tracking-tight relative z-10 break-all" id="displayRestante">R$ 0,00</div>
+                <p class="text-sm text-slate-400 mt-3 relative z-10 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i> Disponível para alocação nas categorias abaixo
+                </p>
             </div>
             
-            <!-- Barra de Progresso % -->
-            <div id="statusCard" class="glass-card p-4 border-l-4 border-slate-400 transition-colors duration-300">
-                <div class="flex justify-between items-end mb-2">
+            <!-- Barra de Progresso de Alocação -->
+            <div id="statusCard" class="glass-card p-5 border-l-4 border-slate-400 transition-colors duration-300">
+                <div class="flex justify-between items-end mb-3">
                     <div>
-                        <p class="text-sm font-bold text-slate-500 uppercase">Total Alocado</p>
+                        <p class="text-sm font-bold text-slate-500 uppercase tracking-wide">Progresso de Distribuição</p>
                         <p id="totalPercentDisplay" class="text-2xl font-bold text-slate-700">0% <span class="text-sm text-slate-400 font-normal">/ 100%</span></p>
                     </div>
-                    <div id="statusIcon" class="text-slate-400 text-xl">
-                        <i class="fas fa-circle-notch"></i>
+                    <div id="statusIcon" class="text-slate-400 text-2xl transition-transform hover:scale-110">
+                        <i class="fas fa-chart-pie"></i>
                     </div>
                 </div>
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                    <div id="progressBar" class="bg-slate-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <!-- Barra visual -->
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner">
+                    <div id="progressBar" class="bg-slate-400 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
                 </div>
-                <p id="statusMsg" class="text-xs font-medium text-slate-500 mt-2">Você ainda pode alocar 100%.</p>
+                <p id="statusMsg" class="text-sm font-medium text-slate-500 mt-3">Você ainda pode alocar 100%.</p>
             </div>
 
             <!-- Categorias de Alocação -->
             <div class="glass-card p-6">
-                <div class="flex justify-between items-center mb-5 border-b pb-3">
+                <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
                     <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2">
-                        <i class="fas fa-chart-pie text-indigo-500"></i> Alocação do Valor
+                        <i class="fas fa-layer-group text-indigo-500"></i> Suas Categorias
                     </h2>
                 </div>
 
-                <!-- Formulário para adicionar nova categoria -->
+                <!-- Adicionar nova categoria -->
                 <div class="flex gap-2 mb-6">
-                    <input type="text" id="desc-cat" placeholder="Nova categoria (Ex: Lazer)" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <button id="add-cat" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">Adicionar</button>
+                    <input type="text" id="desc-cat" placeholder="Nova categoria (Ex: Viagem)" class="flex-1 text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow shadow-sm">
+                    <button id="add-cat" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 flex items-center gap-2">
+                        <i class="fas fa-plus"></i> <span class="hidden sm:inline">Adicionar</span>
+                    </button>
                 </div>
 
-                <!-- Container das categorias -->
-                <div id="allocationsContainer" class="space-y-4">
-                    <!-- Cards de categoria gerados dinamicamente via JS -->
+                <!-- Lista dinâmica de alocações -->
+                <div id="allocationsContainer" class="space-y-3">
+                    <!-- Cards gerados via JavaScript -->
                 </div>
             </div>
         </div>
@@ -188,31 +201,48 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Ambiente e Firebase
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'finance-app-v2';
+        // CHAVE DE SALVAMENTO LOCAL (Importante para Netlify/GitHub Pages)
+        const LOCAL_STORAGE_KEY = 'minhas_financas_app_dados';
+
+        // Ambiente Firebase (Opcional, funciona sem ele via LocalStorage)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'finance-app-netlify';
         const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
         let firebaseConfig = {};
         try { firebaseConfig = JSON.parse(firebaseConfigStr); } catch (e) {}
+        let db = null, auth = null, currentUserId = null;
 
-        // Estado Global
-        const state = {
-            lists: { ganhos: [], fixos: [], variaveis: [] },
+        // ESTADO GLOBAL DA APLICAÇÃO (Dados Iniciais Solicitados)
+        const defaultState = {
+            lists: { 
+                ganhos: [
+                    { id: 'g1', desc: 'Venda de caixas milk', value: 1200.00 },
+                    { id: 'g2', desc: 'Papelaria personalizada', value: 850.50 }
+                ], 
+                fixos: [
+                    { id: 'f1', desc: 'Assinatura de Software', value: 45.00 }
+                ], 
+                variaveis: [
+                    { id: 'v1', desc: 'Papel lamicote e offset', value: 150.00 },
+                    { id: 'v2', desc: 'Lâmina Silhouette', value: 95.90 }
+                ] 
+            },
             allocations: [
-                { id: 'cat_lazer', name: 'Lazer', percent: 0, banco: '', cor: '#3b82f6' },
-                { id: 'cat_viagem', name: 'Viagem', percent: 0, banco: '', cor: '#10b981' },
-                { id: 'cat_reserva', name: 'Reserva de Emergência', percent: 0, banco: '', cor: '#f59e0b' }
+                { id: 'c1', name: 'Lazer com Raika', percent: 40, banco: 'Nubank', cor: '#ec4899' },
+                { id: 'c2', name: 'Investimentos', percent: 30, banco: 'Inter', cor: '#10b981' },
+                { id: 'c3', name: 'Reserva', percent: 30, banco: 'Caixa', cor: '#3b82f6' }
             ],
             restante: 0,
             totalPercent: 0
         };
 
-        let db = null, auth = null, currentUserId = null;
+        // Clonando para evitar mutar o default
+        let state = JSON.parse(JSON.stringify(defaultState));
 
-        // Utilitários
+        // Utilitários de Formatação e ID
         const generateId = () => 'id_' + Math.random().toString(36).substr(2, 9);
         const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
-        // UI Refs
+        // Referências da Interface
         const UI = {
             displayRestante: document.getElementById('displayRestante'),
             totalPercentDisplay: document.getElementById('totalPercentDisplay'),
@@ -224,6 +254,7 @@
             saveBtn: document.getElementById('saveBtn')
         };
 
+        // Renderiza as Listas (Ganhos, Fixos, Variáveis)
         function renderList(type) {
             const listEl = document.getElementById(`list-${type}`);
             const totalEl = document.getElementById(`total-${type}`);
@@ -233,11 +264,11 @@
             state.lists[type].forEach(item => {
                 total += item.value;
                 const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-200 text-sm group";
+                li.className = "flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200 text-sm shadow-sm group hover:border-indigo-200 transition-colors";
                 li.innerHTML = `
-                    <span class="text-slate-700 truncate flex-1 font-medium">${item.desc}</span>
-                    <span class="font-semibold text-slate-800 mr-3">${formatMoney(item.value)}</span>
-                    <button class="text-slate-400 hover:text-rose-500 transition-colors list-remove-btn" data-type="${type}" data-id="${item.id}">
+                    <span class="text-slate-700 truncate flex-1 font-medium pl-1" title="${item.desc}">${item.desc}</span>
+                    <span class="font-bold text-slate-800 mr-3">${formatMoney(item.value)}</span>
+                    <button class="text-slate-300 hover:text-rose-500 transition-colors list-remove-btn px-2 py-1" data-type="${type}" data-id="${item.id}" title="Remover item">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 `;
@@ -247,45 +278,65 @@
             updateCalculations();
         }
 
+        // Renderiza os cards de categorias (Alocações)
         function renderAllocations() {
             UI.allocationsContainer.innerHTML = '';
             
             if (state.allocations.length === 0) {
-                UI.allocationsContainer.innerHTML = '<p class="text-sm text-slate-500 text-center py-4">Nenhuma categoria adicionada.</p>';
+                UI.allocationsContainer.innerHTML = `
+                    <div class="text-center py-8 border-2 border-dashed border-slate-200 rounded-lg">
+                        <i class="fas fa-inbox text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-sm text-slate-500">Nenhuma categoria criada.<br>Adicione uma acima!</p>
+                    </div>`;
                 return;
             }
 
             state.allocations.forEach(cat => {
-                const computedVal = state.restante > 0 ? (state.restante * cat.percent) / 100 : 0;
+                // Previne valores negativos no cálculo visual
+                const validRestante = Math.max(0, state.restante);
+                const computedVal = (validRestante * (cat.percent || 0)) / 100;
                 
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 rounded-lg p-3 shadow-sm flex flex-col md:flex-row gap-3 items-center relative overflow-hidden";
+                card.className = "bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col lg:flex-row gap-4 items-center relative overflow-hidden hover:shadow-md transition-shadow";
                 card.innerHTML = `
-                    <!-- Cor e Nome -->
-                    <div class="flex items-center gap-3 w-full md:w-1/3">
-                        <div class="w-2 h-full absolute left-0 top-0 bottom-0" style="background-color: ${cat.cor}"></div>
-                        <span class="font-bold text-slate-700 ml-3 truncate" title="${cat.name}">${cat.name}</span>
+                    <!-- Tarja de Cor Fixa na esquerda -->
+                    <div class="w-2 h-full absolute left-0 top-0 bottom-0 transition-colors duration-300" style="background-color: ${cat.cor}"></div>
+                    
+                    <!-- Bloco 1: Nome da Categoria -->
+                    <div class="flex items-center gap-3 w-full lg:w-1/3 pl-2">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-sm shrink-0" style="background-color: ${cat.cor}">
+                            <i class="fas fa-tag text-xs"></i>
+                        </div>
+                        <span class="font-bold text-slate-700 truncate text-base" title="${cat.name}">${cat.name}</span>
                     </div>
                     
-                    <!-- % e Valor Calculado -->
-                    <div class="flex items-center gap-2 w-full md:w-1/3 justify-between md:justify-center bg-slate-50 p-2 rounded-md border border-slate-100">
-                        <div class="relative w-20">
-                            <input type="number" data-id="${cat.id}" data-action="percent" value="${cat.percent}" min="0" max="100" class="alloc-input w-full pl-2 pr-6 py-1.5 border border-slate-300 rounded text-right font-bold text-indigo-600 focus:outline-none focus:border-indigo-500" placeholder="0">
-                            <span class="absolute right-2 top-2 text-slate-400 text-xs font-bold">%</span>
+                    <!-- Bloco 2: Porcentagem e Valor (O Coração do app) -->
+                    <div class="flex items-center gap-3 w-full lg:w-1/3 justify-between lg:justify-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        <div class="relative w-24 shrink-0">
+                            <input type="number" data-id="${cat.id}" data-action="percent" value="${cat.percent}" min="0" max="100" 
+                                class="alloc-input w-full pl-3 pr-7 py-2 border border-slate-300 rounded-md text-right font-bold text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner" placeholder="0">
+                            <span class="absolute right-3 top-2.5 text-slate-500 text-sm font-bold">%</span>
                         </div>
-                        <span class="text-sm font-semibold text-slate-600 w-24 text-right">${formatMoney(computedVal)}</span>
+                        <div class="flex flex-col items-end w-28">
+                            <span class="text-xs text-slate-400 font-medium uppercase">Valor</span>
+                            <span class="text-sm font-bold text-emerald-600 truncate w-full text-right" title="${formatMoney(computedVal)}">${formatMoney(computedVal)}</span>
+                        </div>
                     </div>
 
-                    <!-- Banco e Controles -->
-                    <div class="flex items-center gap-2 w-full md:w-1/3 justify-end">
-                        <input type="text" data-id="${cat.id}" data-action="banco" value="${cat.banco}" placeholder="Nome do Banco" class="alloc-input text-sm px-2 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 flex-1 min-w-0">
+                    <!-- Bloco 3: Banco, Cor e Ações -->
+                    <div class="flex items-center gap-2 w-full lg:w-1/3 justify-end">
+                        <div class="relative flex-1 min-w-0">
+                            <i class="fas fa-university absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" data-id="${cat.id}" data-action="banco" value="${cat.banco}" placeholder="Banco (Ex: Nubank)" 
+                                class="alloc-input text-sm pl-8 pr-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full shadow-sm">
+                        </div>
                         
-                        <div class="color-picker-wrapper shrink-0" title="Cor da categoria">
+                        <div class="color-picker-wrapper shrink-0 border border-slate-300 rounded-lg p-0.5 shadow-sm" title="Escolher cor da categoria">
                             <input type="color" data-id="${cat.id}" data-action="cor" value="${cat.cor}" class="alloc-input cursor-pointer">
                         </div>
                         
-                        <button class="text-slate-400 hover:text-rose-500 shrink-0 ml-1 p-1 rounded transition-colors" data-id="${cat.id}" data-action="remove" title="Remover">
-                            <i class="fas fa-times"></i>
+                        <button class="text-slate-400 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 h-9 w-9 flex items-center justify-center rounded-lg transition-colors border border-transparent hover:border-rose-200 shrink-0 ml-1" data-id="${cat.id}" data-action="remove" title="Excluir Categoria">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 `;
@@ -294,30 +345,45 @@
         }
 
         function updateCalculations() {
-            // Totais de fluxo
+            // 1. Calcular Entradas e Saídas
             const totalGanhos = state.lists.ganhos.reduce((acc, curr) => acc + curr.value, 0);
             const totalFixos = state.lists.fixos.reduce((acc, curr) => acc + curr.value, 0);
             const totalVariaveis = state.lists.variaveis.reduce((acc, curr) => acc + curr.value, 0);
             
-            // Restante
+            // 2. Definir Valor Restante
             state.restante = totalGanhos - (totalFixos + totalVariaveis);
             UI.displayRestante.textContent = formatMoney(state.restante);
-            UI.displayRestante.className = `text-4xl sm:text-5xl font-bold tracking-tight ${state.restante < 0 ? 'text-rose-400' : 'text-white'}`;
-
-            // Total Percentual Alocado
-            state.totalPercent = state.allocations.reduce((acc, cat) => acc + (cat.percent || 0), 0);
-            // Corrige possível problema de ponto flutuante
-            state.totalPercent = Math.round(state.totalPercent * 100) / 100;
-
-            updateStatusUI();
             
-            // Atualiza os valores calculados de cada categoria sem recriar os inputs
+            if (state.restante < 0) {
+                UI.displayRestante.className = "text-4xl sm:text-5xl font-bold tracking-tight relative z-10 break-all text-rose-300";
+            } else {
+                UI.displayRestante.className = "text-4xl sm:text-5xl font-bold tracking-tight relative z-10 break-all text-white drop-shadow-md";
+            }
+
+            // 3. Calcular Total Percentual Alocado
+            // Uso de Math.round para evitar bugs de ponto flutuante no JS (ex: 33.3 + 33.3)
+            let soma = state.allocations.reduce((acc, cat) => acc + (parseFloat(cat.percent) || 0), 0);
+            state.totalPercent = Math.round(soma * 10) / 10; 
+
+            // 4. Atualizar UI de Status e Cards
+            updateStatusUI();
+            updateCardValuesWithoutRebuilding();
+        }
+
+        function updateCardValuesWithoutRebuilding() {
+            // Atualiza apenas os valores calculados em R$ nas categorias sem piscar a tela
+            const validRestante = Math.max(0, state.restante);
             state.allocations.forEach(cat => {
-                const computedVal = state.restante > 0 ? (state.restante * cat.percent) / 100 : 0;
-                // Procura o elemento de valor correspondente à categoria (o próximo irmão do container do input)
+                const computedVal = (validRestante * (parseFloat(cat.percent) || 0)) / 100;
                 const inputEl = document.querySelector(`input[data-id="${cat.id}"][data-action="percent"]`);
-                if (inputEl && inputEl.parentElement.nextElementSibling) {
-                    inputEl.parentElement.nextElementSibling.textContent = formatMoney(computedVal);
+                
+                if (inputEl) {
+                    // Navega no DOM para achar o <span> do valor
+                    const valSpan = inputEl.parentElement.nextElementSibling.querySelector('.text-emerald-600');
+                    if (valSpan) {
+                        valSpan.textContent = formatMoney(computedVal);
+                        valSpan.title = formatMoney(computedVal);
+                    }
                 }
             });
         }
@@ -326,40 +392,41 @@
             UI.totalPercentDisplay.innerHTML = `${state.totalPercent}% <span class="text-sm font-normal opacity-70">/ 100%</span>`;
             UI.progressBar.style.width = `${Math.min(state.totalPercent, 100)}%`;
 
-            // Reset de classes
-            const baseCard = 'glass-card p-4 transition-colors duration-300 border-l-4';
+            const baseCard = 'glass-card p-5 transition-colors duration-500 border-l-4 shadow-sm';
             let barColor = '', cardBorder = '', iconHtml = '', msg = '';
             
             let isOverLimit = state.totalPercent > 100;
 
             if (state.totalPercent === 100) {
-                cardBorder = 'border-emerald-500 bg-emerald-50/50';
-                barColor = 'bg-emerald-500';
+                cardBorder = 'border-emerald-500 bg-emerald-50/70';
+                barColor = 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]';
                 iconHtml = '<i class="fas fa-check-circle text-emerald-500"></i>';
-                msg = 'Distribuição perfeita! 100% alocado.';
+                msg = 'Distribuição perfeita! 100% do valor foi alocado.';
             } else if (isOverLimit) {
-                cardBorder = 'border-rose-500 bg-rose-50/50';
+                cardBorder = 'border-rose-500 bg-rose-50/70';
                 barColor = 'bg-rose-500';
-                iconHtml = '<i class="fas fa-exclamation-triangle text-rose-500"></i>';
-                msg = `Erro: O total não pode ultrapassar 100%.`;
+                iconHtml = '<i class="fas fa-exclamation-triangle text-rose-500 animate-pulse"></i>';
+                msg = `Atenção: Você ultrapassou 100%. Reduza as porcentagens.`;
             } else {
-                cardBorder = 'border-amber-400 bg-amber-50/30';
-                barColor = 'bg-amber-400';
-                iconHtml = '<i class="fas fa-adjust text-amber-500"></i>';
-                msg = `Ainda faltam ${Math.round((100 - state.totalPercent)*100)/100}% para alocar.`;
+                cardBorder = 'border-indigo-400 bg-indigo-50/30';
+                barColor = 'bg-indigo-400';
+                iconHtml = '<i class="fas fa-chart-pie text-indigo-500"></i>';
+                let falta = Math.round((100 - state.totalPercent)*10)/10;
+                msg = `Você ainda tem ${falta}% disponível para alocar.`;
             }
 
             UI.statusCard.className = `${baseCard} ${cardBorder}`;
-            UI.progressBar.className = `h-2.5 rounded-full transition-all duration-300 ${barColor}`;
+            UI.progressBar.className = `h-3 rounded-full transition-all duration-500 ease-out ${barColor}`;
             UI.statusIcon.innerHTML = iconHtml;
             UI.statusMsg.textContent = msg;
+            UI.statusMsg.className = `text-sm font-medium mt-3 ${isOverLimit ? 'text-rose-600' : 'text-slate-600'}`;
 
-            // Desativa salvar se > 100%
+            // Botão de salvar fica inativo se a matemática estiver errada
             UI.saveBtn.disabled = isOverLimit;
         }
 
         
-        // Listeners das Listas (Adicionar)
+        // Adicionar itens nas listas (Ganhos, Fixos, Variáveis)
         ['ganhos', 'fixos', 'variaveis'].forEach(type => {
             const btn = document.getElementById(`add-${type}`);
             const iDesc = document.getElementById(`desc-${type}`);
@@ -372,13 +439,15 @@
                     state.lists[type].push({ id: generateId(), desc, value: val });
                     iDesc.value = ''; iVal.value = ''; iDesc.focus();
                     renderList(type);
+                } else {
+                    showToast("Preencha descrição e um valor válido.", true);
                 }
             };
             btn.addEventListener('click', add);
             iVal.addEventListener('keypress', (e) => e.key === 'Enter' && add());
         });
 
-        // Delegação de Remoção das Listas
+        // Delegação para remover itens das listas
         document.body.addEventListener('click', (e) => {
             const btn = e.target.closest('.list-remove-btn');
             if (btn) {
@@ -388,23 +457,28 @@
             }
         });
 
-        // Adicionar Categoria
+        // Adicionar Nova Categoria de Alocação
         document.getElementById('add-cat').addEventListener('click', () => {
             const input = document.getElementById('desc-cat');
             const name = input.value.trim();
             if (name) {
-                // Cor aleatória bonita
-                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'];
+                // Paleta de cores moderna
+                const colors = ['#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6'];
                 const randColor = colors[state.allocations.length % colors.length];
                 
                 state.allocations.push({ id: generateId(), name, percent: 0, banco: '', cor: randColor });
                 input.value = '';
                 renderAllocations();
                 updateCalculations();
+            } else {
+                showToast("Digite um nome para a categoria.", true);
             }
         });
+        document.getElementById('desc-cat').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') document.getElementById('add-cat').click();
+        });
 
-        // Delegação de Eventos para Alocações (Resolve os bugs de eventos duplicados)
+        // VALIDAÇÃO RIGOROSA DE 100% E DELEGAÇÃO DE EVENTOS
         UI.allocationsContainer.addEventListener('input', (e) => {
             if (!e.target.matches('.alloc-input')) return;
             
@@ -418,25 +492,32 @@
             } 
             else if (action === 'cor') {
                 state.allocations[catIndex].cor = e.target.value;
-                // Atualiza cor da tarja lateral
-                e.target.closest('.bg-white').querySelector('.absolute').style.backgroundColor = e.target.value;
+                // Atualiza visualmente a tarja e o ícone em tempo real
+                const card = e.target.closest('.bg-white');
+                card.querySelector('.absolute').style.backgroundColor = e.target.value;
+                card.querySelector('.rounded-full').style.backgroundColor = e.target.value;
             }
             else if (action === 'percent') {
                 let val = parseFloat(e.target.value);
-                if (isNaN(val) || val < 0) val = 0;
+                if (isNaN(val)) val = 0;
+                if (val < 0) val = 0;
 
-                // Validação Rigorosa: Verifica a soma dos OUTROS
-                const sumOthers = state.allocations.reduce((sum, c, idx) => idx !== catIndex ? sum + (c.percent || 0) : sum, 0);
+                // Lógica de Bloqueio de 100%
+                // Soma todos os outros valores que não são este input atual
+                const sumOthers = state.allocations.reduce((sum, c, idx) => idx !== catIndex ? sum + (parseFloat(c.percent) || 0) : sum, 0);
                 const maxAllowed = Math.max(0, 100 - sumOthers);
 
                 if (val > maxAllowed) {
                     val = maxAllowed;
-                    e.target.value = val; // Força limite no UI
+                    e.target.value = val; // Substitui o valor no input imediatamente
                     
-                    // Feedback visual
-                    e.target.classList.add('border-rose-500', 'bg-rose-50', 'ring-2', 'ring-rose-200');
-                    setTimeout(() => e.target.classList.remove('border-rose-500', 'bg-rose-50', 'ring-2', 'ring-rose-200'), 800);
-                    showToast("Limite atingido! Ajustado automaticamente.", true);
+                    // Efeito de erro visual no input
+                    e.target.classList.add('border-rose-500', 'bg-rose-50', 'ring-rose-200', 'text-rose-600');
+                    setTimeout(() => {
+                        e.target.classList.remove('border-rose-500', 'bg-rose-50', 'ring-rose-200', 'text-rose-600');
+                    }, 500);
+                    
+                    showToast("Limite atingido! O valor foi ajustado para caber nos 100%.", true);
                 }
 
                 state.allocations[catIndex].percent = val;
@@ -444,7 +525,7 @@
             }
         });
 
-        // Remover Categoria (Click)
+        // Remover Categoria
         UI.allocationsContainer.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-action="remove"]');
             if (btn) {
@@ -455,104 +536,174 @@
             }
         });
 
-        // Sistema de Toast
+        
         function showToast(msg, isWarning = false) {
             const toast = document.getElementById('toast');
+            const toastDiv = toast.querySelector('div');
+            const icon = document.getElementById('toastIcon');
+            
             document.getElementById('toastMessage').textContent = msg;
             
-            const icon = document.getElementById('toastIcon');
-            icon.className = isWarning ? 'fas fa-exclamation-circle text-amber-400' : 'fas fa-check-circle text-emerald-400';
+            if (isWarning) {
+                icon.className = 'fas fa-exclamation-circle text-amber-400';
+                toastDiv.className = 'bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 border-l-4 border-amber-500';
+            } else {
+                icon.className = 'fas fa-check-circle text-emerald-400';
+                toastDiv.className = 'bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 border-l-4 border-emerald-500';
+            }
             
             toast.classList.remove('translate-y-full', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 3000);
+            setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 3500);
         }
 
+        // SALVAR NO LOCALSTORAGE (Ideal para Netlify/GitHub)
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+                return true;
+            } catch(e) {
+                console.error("Erro no LocalStorage:", e);
+                return false;
+            }
+        }
+
+        // CARREGAR DO LOCALSTORAGE
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    // Mescla para evitar erros se a estrutura antiga não tiver alguma chave
+                    if(parsed.lists) state.lists = parsed.lists;
+                    if(parsed.allocations) state.allocations = parsed.allocations;
+                    return true;
+                }
+            } catch(e) {
+                console.error("Erro ao ler LocalStorage:", e);
+            }
+            return false; // Retorna falso se não havia dados salvos
+        }
+
+        // Integração Firebase (Apenas se o ambiente estiver configurado com as chaves)
         async function initFirebase() {
             if (Object.keys(firebaseConfig).length === 0) {
-                console.log("Modo Local. Nuvem inativa.");
+                console.log("Firebase não configurado. Utilizando apenas Armazenamento Local (Offline-first).");
                 return;
             }
-
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-
-                // MANDATORY RULE 3: Auth First
+                
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-
                 currentUserId = auth.currentUser.uid;
-                await loadData();
+                await loadFromFirebase();
             } catch (error) {
                 console.error("Firebase init erro:", error);
             }
         }
 
-        async function loadData() {
+        async function loadFromFirebase() {
             if (!currentUserId || !db) return;
-            
-            // MANDATORY RULE 1: Strict Paths
-            const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'finance_data', 'latest');
             try {
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'finance_data', 'latest');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.lists) state.lists = data.lists;
                     if (data.allocations) state.allocations = data.allocations;
-                    
-                    renderList('ganhos');
-                    renderList('fixos');
-                    renderList('variaveis');
-                    renderAllocations();
-                    showToast("Dados em nuvem carregados!");
+                    renderAll();
+                    console.log("Dados carregados da Nuvem.");
                 }
             } catch (error) {
-                console.error("Erro ao carregar:", error);
+                console.error("Erro ao carregar do Firebase:", error);
             }
         }
 
-        UI.saveBtn.addEventListener('click', async () => {
-            if (state.totalPercent > 100) return; // Proteção extra
-
-            UI.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-            UI.saveBtn.disabled = true;
-
-            if (!currentUserId || !db) {
-                setTimeout(() => {
-                    UI.saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Salvar Dados</span>';
-                    UI.saveBtn.disabled = false;
-                    showToast("Salvo localmente (Demonstração)");
-                }, 800);
-                return;
-            }
-
-            const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'finance_data', 'latest');
+        async function saveToFirebase() {
+            if (!currentUserId || !db) return false;
             try {
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'finance_data', 'latest');
                 await setDoc(docRef, {
                     lists: state.lists,
                     allocations: state.allocations,
                     updatedAt: new Date().toISOString()
                 });
-                showToast("Dados salvos na nuvem!");
+                return true;
             } catch (error) {
-                console.error("Erro salvar:", error);
-                showToast("Erro ao salvar.", true);
-            } finally {
-                UI.saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Salvar Dados</span>';
+                console.error("Erro salvar Firebase:", error);
+                return false;
+            }
+        }
+
+        // AÇÃO DO BOTÃO SALVAR
+        UI.saveBtn.addEventListener('click', async () => {
+            if (state.totalPercent > 100) {
+                showToast("Corrija a porcentagem antes de salvar!", true);
+                return;
+            }
+
+            // Estado de loading no botão
+            const originalHtml = UI.saveBtn.innerHTML;
+            UI.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Salvando...</span>';
+            UI.saveBtn.disabled = true;
+
+            // 1. Sempre salva no dispositivo local (LocalStorage)
+            const localSaved = saveToLocalStorage();
+
+            // 2. Tenta salvar no Firebase se existir
+            let cloudSaved = false;
+            if (currentUserId && db) {
+                cloudSaved = await saveToFirebase();
+            }
+
+            // Restaura botão e avisa o usuário
+            setTimeout(() => {
+                UI.saveBtn.innerHTML = originalHtml;
                 UI.saveBtn.disabled = false;
+
+                if (cloudSaved) {
+                    showToast("Dados salvos no seu aparelho e na nuvem!");
+                } else if (localSaved) {
+                    showToast("Dados salvos localmente com sucesso!");
+                } else {
+                    showToast("Erro ao tentar salvar os dados.", true);
+                }
+            }, 500); // pequeno delay para UX
+        });
+
+        // Inicialização Principal
+        function renderAll() {
+            renderList('ganhos');
+            renderList('fixos');
+            renderList('variaveis');
+            renderAllocations();
+            updateCalculations();
+        }
+
+        // Quando o app abre:
+        window.addEventListener('DOMContentLoaded', () => {
+            // Tenta ler do LocalStorage primeiro. Se tiver, ele sobrepõe o defaultState.
+            const hasLocalData = loadFromLocalStorage();
+            
+            // Renderiza a tela (com dados salvos ou com os dados default de exemplo)
+            renderAll();
+            
+            // Inicia nuvem em background (se existir configuração, ele busca e substitui se achar algo)
+            initFirebase();
+            
+            if (!hasLocalData) {
+                // Se é a primeira vez, mostramos uma dica que os dados são de exemplo
+                setTimeout(() => {
+                    showToast("Bem-vindo! Dados de exemplo carregados.");
+                }, 1000);
             }
         });
 
-        // Init
-        renderList('ganhos');
-        renderList('fixos');
-        renderList('variaveis');
-        renderAllocations();
-        initFirebase();
     </script>
 </body>
 </html>
