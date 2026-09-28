@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Financeira Pessoal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        /* Ocultar setas dos inputs de número */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 1);
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden;
+        }
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        
+        /* Custom Scrollbar for Lists */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen pb-20">
+
+    <nav class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
+                <i class="fas fa-wallet"></i> Minhas Finanças
+            </h1>
+            <button id="saveBtn" class="bg-white text-indigo-600 hover:bg-indigo-50 font-semibold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Salvar Dados</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 z-50 transform transition-all duration-300 translate-y-full opacity-0 pointer-events-none">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3">
+            <i id="toastIcon" class="fas fa-check-circle text-emerald-400"></i>
+            <span id="toastMessage">Sucesso!</span>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-5 space-y-6">
+            
+            <div class="glass-card p-6">
+                <h2 class="text-lg font-bold text-slate-700 mb-5 flex items-center gap-2 border-b pb-3">
+                    <i class="fas fa-exchange-alt text-indigo-500"></i> Fluxo de Caixa
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Ganhos -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-600 uppercase">Ganhos</h3>
+                            <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded" id="total-ganhos">R$ 0,00</span>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="desc-ganhos" placeholder="Descrição" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="val-ganhos" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" step="0.01">
+                            <button id="add-ganhos" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <ul id="list-ganhos" class="space-y-2 max-h-40 overflow-y-auto pr-1 empty:hidden custom-scrollbar"></ul>
+                    </div>
+                    
+                    <!-- Gastos Fixos -->
+                    <div class="pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-600 uppercase">Gastos Fixos</h3>
+                            <span class="text-sm font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded" id="total-fixos">R$ 0,00</span>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="desc-fixos" placeholder="Descrição" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="val-fixos" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" step="0.01">
+                            <button id="add-fixos" class="bg-rose-500 hover:bg-rose-600 text-white px-3 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <ul id="list-fixos" class="space-y-2 max-h-40 overflow-y-auto pr-1 empty:hidden custom-scrollbar"></ul>
+                    </div>
+
+                    <!-- Gastos Variáveis -->
+                    <div class="pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-600 uppercase">Gastos Variáveis</h3>
+                            <span class="text-sm font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded" id="total-variaveis">R$ 0,00</span>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="desc-variaveis" placeholder="Descrição" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="val-variaveis" placeholder="R$ 0.00" class="w-24 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" step="0.01">
+                            <button id="add-variaveis" class="bg-amber-500 hover:bg-amber-600 text-white px-3 rounded-lg transition-colors"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <ul id="list-variaveis" class="space-y-2 max-h-40 overflow-y-auto pr-1 empty:hidden custom-scrollbar"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Valor Restante -->
+            <div class="glass-card p-6 bg-gradient-to-r from-slate-800 to-slate-900 text-white relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500 rounded-full opacity-20 blur-2xl"></div>
+                <h2 class="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Valor Restante</h2>
+                <div class="text-4xl sm:text-5xl font-bold tracking-tight" id="displayRestante">R$ 0,00</div>
+                <p class="text-sm text-slate-400 mt-2">Disponível para alocação nas categorias abaixo</p>
+            </div>
+            
+            <!-- Barra de Progresso % -->
+            <div id="statusCard" class="glass-card p-4 border-l-4 border-slate-400 transition-colors duration-300">
+                <div class="flex justify-between items-end mb-2">
+                    <div>
+                        <p class="text-sm font-bold text-slate-500 uppercase">Total Alocado</p>
+                        <p id="totalPercentDisplay" class="text-2xl font-bold text-slate-700">0% <span class="text-sm text-slate-400 font-normal">/ 100%</span></p>
+                    </div>
+                    <div id="statusIcon" class="text-slate-400 text-xl">
+                        <i class="fas fa-circle-notch"></i>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div id="progressBar" class="bg-slate-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p id="statusMsg" class="text-xs font-medium text-slate-500 mt-2">Você ainda pode alocar 100%.</p>
+            </div>
+
+            <!-- Categorias de Alocação -->
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-center mb-5 border-b pb-3">
+                    <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-indigo-500"></i> Alocação do Valor
+                    </h2>
+                </div>
+
+                <!-- Formulário para adicionar nova categoria -->
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="desc-cat" placeholder="Nova categoria (Ex: Lazer)" class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <button id="add-cat" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">Adicionar</button>
+                </div>
+
+                <!-- Container das categorias -->
+                <div id="allocationsContainer" class="space-y-4">
+                    <!-- Cards de categoria gerados dinamicamente via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Ambiente e Firebase
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'finance-app-v2';
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+        let firebaseConfig = {};
+        try { firebaseConfig = JSON.parse(firebaseConfigStr); } catch (e) {}
+
+        // Estado Global
+        const state = {
+            lists: { ganhos: [], fixos: [], variaveis: [] },
+            allocations: [
+                { id: 'cat_lazer', name: 'Lazer', percent: 0, banco: '', cor: '#3b82f6' },
+                { id: 'cat_viagem', name: 'Viagem', percent: 0, banco: '', cor: '#10b981' },
+                { id: 'cat_reserva', name: 'Reserva de Emergência', percent: 0, banco: '', cor: '#f59e0b' }
+            ],
+            restante: 0,
+            totalPercent: 0
+        };
+
+        let db = null, auth = null, currentUserId = null;
+
+        // Utilitários
+        const generateId = () => 'id_' + Math.random().toString(36).substr(2, 9);
+        const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+        // UI Refs
+        const UI = {
+            displayRestante: document.getElementById('displayRestante'),
+            totalPercentDisplay: document.getElementById('totalPercentDisplay'),
+            progressBar: document.getElementById('progressBar'),
+            statusCard: document.getElementById('statusCard'),
+            statusIcon: document.getElementById('statusIcon'),
+            statusMsg: document.getElementById('statusMsg'),
+            allocationsContainer: document.getElementById('allocationsContainer'),
+            saveBtn: document.getElementById('saveBtn')
+        };
+
+        function renderList(type) {
+            const listEl = document.getElementById(`list-${type}`);
+            const totalEl = document.getElementById(`total-${type}`);
+            listEl.innerHTML = '';
+            
+            let total = 0;
+            state.lists[type].forEach(item => {
+                total += item.value;
+                const li = document.createElement('li');
+                li.className = "flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-200 text-sm group";
+                li.innerHTML = `
+                    <span class="text-slate-700 truncate flex-1 font-medium">${item.desc}</span>
+                    <span class="font-semibold text-slate-800 mr-3">${formatMoney(item.value)}</span>
+                    <button class="text-slate-400 hover:text-rose-500 transition-colors list-remove-btn" data-type="${type}" data-id="${item.id}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                listEl.appendChild(li);
+            });
+            totalEl.textContent = formatMoney(total);
+            updateCalculations();
+        }
+
+        function renderAllocations() {
+            UI.allocationsContainer.innerHTML = '';
+            
+            if (state.allocations.length === 0) {
+                UI.allocationsContainer.innerHTML = '<p class="text-sm text-slate-500 text-center py-4">Nenhuma categoria adicionada.</p>';
+                return;
+            }
+
+            state.allocations.forEach(cat => {
+                const computedVal = state.restante > 0 ? (state.restante * cat.percent) / 100 : 0;
+                
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded-lg p-3 shadow-sm flex flex-col md:flex-row gap-3 items-center relative overflow-hidden";
+                card.innerHTML = `
+                    <!-- Cor e Nome -->
+                    <div class="flex items-center gap-3 w-full md:w-1/3">
+                        <div class="w-2 h-full absolute left-0 top-0 bottom-0" style="background-color: ${cat.cor}"></div>
+                        <span class="font-bold text-slate-700 ml-3 truncate" title="${cat.name}">${cat.name}</span>
+                    </div>
+                    
+                    <!-- % e Valor Calculado -->
+                    <div class="flex items-center gap-2 w-full md:w-1/3 justify-between md:justify-center bg-slate-50 p-2 rounded-md border border-slate-100">
+                        <div class="relative w-20">
+                            <input type="number" data-id="${cat.id}" data-action="percent" value="${cat.percent}" min="0" max="100" class="alloc-input w-full pl-2 pr-6 py-1.5 border border-slate-300 rounded text-right font-bold text-indigo-600 focus:outline-none focus:border-indigo-500" placeholder="0">
+                            <span class="absolute right-2 top-2 text-slate-400 text-xs font-bold">%</span>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-600 w-24 text-right">${formatMoney(computedVal)}</span>
+                    </div>
+
+                    <!-- Banco e Controles -->
+                    <div class="flex items-center gap-2 w-full md:w-1/3 justify-end">
+                        <input type="text" data-id="${cat.id}" data-action="banco" value="${cat.banco}" placeholder="Nome do Banco" class="alloc-input text-sm px-2 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 flex-1 min-w-0">
+                        
+                        <div class="color-picker-wrapper shrink-0" title="Cor da categoria">
+                            <input type="color" data-id="${cat.id}" data-action="cor" value="${cat.cor}" class="alloc-input cursor-pointer">
+                        </div>
+                        
+                        <button class="text-slate-400 hover:text-rose-500 shrink-0 ml-1 p-1 rounded transition-colors" data-id="${cat.id}" data-action="remove" title="Remover">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                UI.allocationsContainer.appendChild(card);
+            });
+        }
+
+        function updateCalculations() {
+            // Totais de fluxo
+            const totalGanhos = state.lists.ganhos.reduce((acc, curr) => acc + curr.value, 0);
+            const totalFixos = state.lists.fixos.reduce((acc, curr) => acc + curr.value, 0);
+            const totalVariaveis = state.lists.variaveis.reduce((acc, curr) => acc + curr.value, 0);
+            
+            // Restante
+            state.restante = totalGanhos - (totalFixos + totalVariaveis);
+            UI.displayRestante.textContent = formatMoney(state.restante);
+            UI.displayRestante.className = `text-4xl sm:text-5xl font-bold tracking-tight ${state.restante < 0 ? 'text-rose-400' : 'text-white'}`;
+
+            // Total Percentual Alocado
+            state.totalPercent = state.allocations.reduce((acc, cat) => acc + (cat.percent || 0), 0);
+            // Corrige possível problema de ponto flutuante
+            state.totalPercent = Math.round(state.totalPercent * 100) / 100;
+
+            updateStatusUI();
+            
+            // Atualiza os valores calculados de cada categoria sem recriar os inputs
+            state.allocations.forEach(cat => {
+                const computedVal = state.restante > 0 ? (state.restante * cat.percent) / 100 : 0;
+                // Procura o elemento de valor correspondente à categoria (o próximo irmão do container do input)
+                const inputEl = document.querySelector(`input[data-id="${cat.id}"][data-action="percent"]`);
+                if (inputEl && inputEl.parentElement.nextElementSibling) {
+                    inputEl.parentElement.nextElementSibling.textContent = formatMoney(computedVal);
+                }
+            });
+        }
+
+        function updateStatusUI() {
+            UI.totalPercentDisplay.innerHTML = `${state.totalPercent}% <span class="text-sm font-normal opacity-70">/ 100%</span>`;
+            UI.progressBar.style.width = `${Math.min(state.totalPercent, 100)}%`;
+
+            // Reset de classes
+            const baseCard = 'glass-card p-4 transition-colors duration-300 border-l-4';
+            let barColor = '', cardBorder = '', iconHtml = '', msg = '';
+            
+            let isOverLimit = state.totalPercent > 100;
+
+            if (state.totalPercent === 100) {
+                cardBorder = 'border-emerald-500 bg-emerald-50/50';
+                barColor = 'bg-emerald-500';
+                iconHtml = '<i class="fas fa-check-circle text-emerald-500"></i>';
+                msg = 'Distribuição perfeita! 100% alocado.';
+            } else if (isOverLimit) {
+                cardBorder = 'border-rose-500 bg-rose-50/50';
+                barColor = 'bg-rose-500';
+                iconHtml = '<i class="fas fa-exclamation-triangle text-rose-500"></i>';
+                msg = `Erro: O total não pode ultrapassar 100%.`;
+            } else {
+                cardBorder = 'border-amber-400 bg-amber-50/30';
+                barColor = 'bg-amber-400';
+                iconHtml = '<i class="fas fa-adjust text-amber-500"></i>';
+                msg = `Ainda faltam ${Math.round((100 - state.totalPercent)*100)/100}% para alocar.`;
+            }
+
+            UI.statusCard.className = `${baseCard} ${cardBorder}`;
+            UI.progressBar.className = `h-2.5 rounded-full transition-all duration-300 ${barColor}`;
+            UI.statusIcon.innerHTML = iconHtml;
+            UI.statusMsg.textContent = msg;
+
+            // Desativa salvar se > 100%
+            UI.saveBtn.disabled = isOverLimit;
+        }
+
+        
+        // Listeners das Listas (Adicionar)
+        ['ganhos', 'fixos', 'variaveis'].forEach(type => {
+            const btn = document.getElementById(`add-${type}`);
+            const iDesc = document.getElementById(`desc-${type}`);
+            const iVal = document.getElementById(`val-${type}`);
+            
+            const add = () => {
+                const desc = iDesc.value.trim();
+                const val = parseFloat(iVal.value);
+                if (desc && !isNaN(val) && val > 0) {
+                    state.lists[type].push({ id: generateId(), desc, value: val });
+                    iDesc.value = ''; iVal.value = ''; iDesc.focus();
+                    renderList(type);
+                }
+            };
+            btn.addEventListener('click', add);
+            iVal.addEventListener('keypress', (e) => e.key === 'Enter' && add());
+        });
+
+        // Delegação de Remoção das Listas
+        document.body.addEventListener('click', (e) => {
+            const btn = e.target.closest('.list-remove-btn');
+            if (btn) {
+                const { type, id } = btn.dataset;
+                state.lists[type] = state.lists[type].filter(i => i.id !== id);
+                renderList(type);
+            }
+        });
+
+        // Adicionar Categoria
+        document.getElementById('add-cat').addEventListener('click', () => {
+            const input = document.getElementById('desc-cat');
+            const name = input.value.trim();
+            if (name) {
+                // Cor aleatória bonita
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'];
+                const randColor = colors[state.allocations.length % colors.length];
+                
+                state.allocations.push({ id: generateId(), name, percent: 0, banco: '', cor: randColor });
+                input.value = '';
+                renderAllocations();
+                updateCalculations();
+            }
+        });
+
+        // Delegação de Eventos para Alocações (Resolve os bugs de eventos duplicados)
+        UI.allocationsContainer.addEventListener('input', (e) => {
+            if (!e.target.matches('.alloc-input')) return;
+            
+            const id = e.target.dataset.id;
+            const action = e.target.dataset.action;
+            const catIndex = state.allocations.findIndex(a => a.id === id);
+            if (catIndex === -1) return;
+
+            if (action === 'banco') {
+                state.allocations[catIndex].banco = e.target.value;
+            } 
+            else if (action === 'cor') {
+                state.allocations[catIndex].cor = e.target.value;
+                // Atualiza cor da tarja lateral
+                e.target.closest('.bg-white').querySelector('.absolute').style.backgroundColor = e.target.value;
+            }
+            else if (action === 'percent') {
+                let val = parseFloat(e.target.value);
+                if (isNaN(val) || val < 0) val = 0;
+
+                // Validação Rigorosa: Verifica a soma dos OUTROS
+                const sumOthers = state.allocations.reduce((sum, c, idx) => idx !== catIndex ? sum + (c.percent || 0) : sum, 0);
+                const maxAllowed = Math.max(0, 100 - sumOthers);
+
+                if (val > maxAllowed) {
+                    val = maxAllowed;
+                    e.target.value = val; // Força limite no UI
+                    
+                    // Feedback visual
+                    e.target.classList.add('border-rose-500', 'bg-rose-50', 'ring-2', 'ring-rose-200');
+                    setTimeout(() => e.target.classList.remove('border-rose-500', 'bg-rose-50', 'ring-2', 'ring-rose-200'), 800);
+                    showToast("Limite atingido! Ajustado automaticamente.", true);
+                }
+
+                state.allocations[catIndex].percent = val;
+                updateCalculations();
+            }
+        });
+
+        // Remover Categoria (Click)
+        UI.allocationsContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action="remove"]');
+            if (btn) {
+                const id = btn.dataset.id;
+                state.allocations = state.allocations.filter(a => a.id !== id);
+                renderAllocations();
+                updateCalculations();
+            }
+        });
+
+        // Sistema de Toast
+        function showToast(msg, isWarning = false) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            
+            const icon = document.getElementById('toastIcon');
+            icon.className = isWarning ? 'fas fa-exclamation-circle text-amber-400' : 'fas fa-check-circle text-emerald-400';
+            
+            toast.classList.remove('translate-y-full', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 3000);
+        }
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.log("Modo Local. Nuvem inativa.");
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // MANDATORY RULE 3: Auth First
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                currentUserId = auth.currentUser.uid;
+                await loadData();
+            } catch (error) {
+                console.error("Firebase init erro:", error);
+            }
+        }
+
+        async function loadData() {
+            if (!currentUserId || !db) return;
+            
+            // MANDATORY RULE 1: Strict Paths
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'finance_data', 'latest');
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.lists) state.lists = data.lists;
+                    if (data.allocations) state.allocations = data.allocations;
+                    
+                    renderList('ganhos');
+                    renderList('fixos');
+                    renderList('variaveis');
+                    renderAllocations();
+                    showToast("Dados em nuvem carregados!");
+                }
+            } catch (error) {
+                console.error("Erro ao carregar:", error);
+            }
+        }
+
+        UI.saveBtn.addEventListener('click', async () => {
+            if (state.totalPercent > 100) return; // Proteção extra
+
+            UI.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            UI.saveBtn.disabled = true;
+
+            if (!currentUserId || !db) {
+                setTimeout(() => {
+                    UI.saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Salvar Dados</span>';
+                    UI.saveBtn.disabled = false;
+                    showToast("Salvo localmente (Demonstração)");
+                }, 800);
+                return;
+            }
+
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'finance_data', 'latest');
+            try {
+                await setDoc(docRef, {
+                    lists: state.lists,
+                    allocations: state.allocations,
+                    updatedAt: new Date().toISOString()
+                });
+                showToast("Dados salvos na nuvem!");
+            } catch (error) {
+                console.error("Erro salvar:", error);
+                showToast("Erro ao salvar.", true);
+            } finally {
+                UI.saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Salvar Dados</span>';
+                UI.saveBtn.disabled = false;
+            }
+        });
+
+        // Init
+        renderList('ganhos');
+        renderList('fixos');
+        renderList('variaveis');
+        renderAllocations();
+        initFirebase();
+    </script>
+</body>
+</html>
